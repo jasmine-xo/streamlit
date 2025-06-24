@@ -1,21 +1,30 @@
 import pickle
 import streamlit as st
 import numpy as np
-from os import path
+import os
 
+# App title
+st.title("Total Litres of Pure Alcohol Predictor")
 
-st.title("Flower Classification App")
+# Load model (only once)
+@st.cache_resource
+def load_model():
+    base_path = os.path.dirname(__file__)
+    file_path = os.path.join(base_path, "model", "model.pkl")
+    with open(file_path, "rb") as f:
+        return pickle.load(f)
 
+model = load_model()
 
-file_name = "lr_model.pkl"
-with open(path.join("model", file_name), "rb") as f:
-    lr_model = pickle.load(f)
+# Input fields
+country = st.number_input("Insert Country (encoded)", min_value=0)
+beer = st.number_input("Beer Servings", min_value=0)
+spirit = st.number_input("Spirit Servings", min_value=0)
+wine = st.number_input("Wine Servings", min_value=0)
+continent = st.number_input("Insert Continent (encoded)", min_value=0)
 
-sl = st.number_input("Insert a sepel length")
-sw = st.number_input("Insert a sepel width")
-pl = st.number_input("Insert a petal length")
-pw = st.number_input("Insert a petal width")
-
+# Predict button
 if st.button("Predict"):
-    pred = lr_model.predict(np.array([[sl, sw, pl, pw]]))
-    st.write("The flower is :", pred[0])
+    input_data = np.array([[country, beer, spirit, wine, continent]])
+    prediction = model.predict(input_data)
+    st.success(f"Predicted Total Litres of Pure Alcohol: {round(prediction[0], 2)}")
